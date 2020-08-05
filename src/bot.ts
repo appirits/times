@@ -26,8 +26,16 @@ export default function initialize({ token, signingSecret, channel }: Init) {
     return users[id];
   }
 
+  const done = [] as string[];
+
   events.on("message", async (event) => {
     if (event.subtype === "bot_message" || event.bot_profile) return;
+
+    // たまに再送されるので2度目以降は無視
+    if (done.includes(event.client_msg_id)) return;
+    done.unshift(event.client_msg_id);
+    done.splice(1024); // 古いのは捨てる
+
     console.debug(event);
     const user = await userInfo(event.user);
     web.chat.postMessage({
