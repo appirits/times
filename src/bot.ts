@@ -29,7 +29,12 @@ export default function initialize({ token, signingSecret, channel }: Init) {
   const done = [] as string[];
 
   events.on("message", async (event) => {
-    if (event.subtype === "bot_message" || event.bot_profile) return;
+    // 「チャンネルに参加しました」等とボットのポストは無視
+    if (event.subtype || event.bot_profile) return;
+    // 転載先へのポスト
+    if (event.channel === channel) return;
+    // スレッド
+    if (event.thread_ts) return;
 
     // たまに再送されるので2度目以降は無視
     if (done.includes(event.client_msg_id)) return;
