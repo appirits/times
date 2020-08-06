@@ -51,5 +51,18 @@ export default function initialize({ token, signingSecret, channel }: Init) {
     });
   });
 
+  events.on("app_mention", (event) => {
+    console.debug("mention", event);
+    if (/\bbye\b|さようなら/.test(event.text) && event.channel !== channel) {
+      web.conversations.leave({ channel: event.channel });
+    } else {
+      web.chat.postEphemeral({
+        channel: event.channel,
+        user: event.user,
+        text: "*bye* か *さようなら* で出ていきます。",
+      });
+    }
+  });
+
   return events;
 }
